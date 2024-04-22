@@ -5,7 +5,7 @@ on:
     branches:
       - main # 'main' ブランチへのプッシュ時にトリガー
     paths:
-      - "./github/workflows/cd.yaml"
+      - ".github/workflows/cd.yaml"
       - "lambda-container-pattern/**" # 特定のディレクトリが変更された場合にのみトリガー
 env:
   WORKING_DIRECTORY: ./lambda-container-pattern/iac/app-infra
