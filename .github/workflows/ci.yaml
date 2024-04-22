@@ -1,0 +1,38 @@
+name: Deploy to AWS ECR
+
+on:
+  push:
+    branches:
+      - main # 'main' ブランチへのプッシュ時にトリガー
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # OIDC 認証トークンを書き込む権限
+      contents: read # リポジトリコンテンツを読み取る権限
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Configure AWS credentials from OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ap-northeast-1 # 適切なAWSリージョンに設定
+          role-to-assume: ${vars.AWS_ROLE_ARN}
+          role-session-name: GitHubActions
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          tags: 111815285043.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:latest
+          file: ./Dockerfile
+          context: ./app
