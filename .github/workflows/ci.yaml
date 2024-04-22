@@ -35,4 +35,4 @@ jobs:
           push: true
           tags: 111815285043.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:latest
           file: ./Dockerfile
-          context: ./app
+          context: ./lambda-container-pattern/app
