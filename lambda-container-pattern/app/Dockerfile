@@ -1,4 +1,4 @@
-FROM golang:1.20 as build
+FROM golang:1.22.0 as build
 WORKDIR /app
 # Copy dependencies list
 COPY ./lambda-container-pattern/app/go.mod ./lambda-container-pattern/app/go.sum ./
