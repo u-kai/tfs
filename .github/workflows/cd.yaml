@@ -1,0 +1,49 @@
+name: Deploy Terraform Configuration
+
+on:
+  push:
+    branches:
+      - main # 'main' ブランチへのプッシュ時にトリガー
+    paths:
+      - "./github/workflows/cd.yaml"
+      - "lambda-container-pattern/**" # 特定のディレクトリが変更された場合にのみトリガー
+env:
+  WORKING_DIRECTORY: ./lambda-container-pattern/iac/app-infra
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # OIDC 認証トークンを書き込む権限
+      contents: read # リポジトリコンテンツを読み取る権限
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials from OIDC
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ap-northeast-1 # 適切なAWSリージョンに設定
+          role-to-assume: ${{vars.AWS_ROLE_ARN}}
+          role-session-name: GitHubActions
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: "1.1.0" # 使用するTerraformのバージョン
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+        working-directory: ${{env.WORKING_DIRECTORY}}
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan
+        working-directory: ${{env.WORKING_DIRECTORY}}
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+        working-directory: ${{env.WORKING_DIRECTORY}}
+        if: github.ref == 'refs/heads/main' # main ブランチにプッシュされた時のみ apply を実行
