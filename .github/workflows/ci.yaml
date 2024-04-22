@@ -32,8 +32,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v3
         with:
-          build-args: |
-            PROVENANCE=false
+          provenance: false
           push: true
           tags: 111815285043.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:latest
           file: ./lambda-container-pattern/app/Dockerfile
