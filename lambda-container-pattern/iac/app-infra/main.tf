@@ -3,6 +3,16 @@ resource "aws_lambda_function" "app_lambda" {
   image_uri     = var.app_repo_url
   package_type  = "Image"
   role          = aws_iam_role.app_lambda_role.arn
+  environment {
+    variables = {
+      SECRET_KEY = var.secret_key
+    }
+  }
+}
+
+variable "secret_key" {
+  type      = string
+  sensitive = true
 }
 
 resource "aws_iam_role" "app_lambda_role" {
