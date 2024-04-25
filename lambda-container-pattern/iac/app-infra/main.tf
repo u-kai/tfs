@@ -3,6 +3,7 @@ resource "aws_lambda_function" "app_lambda" {
   image_uri     = var.app_repo_url
   package_type  = "Image"
   role          = aws_iam_role.app_lambda_role.arn
+
   environment {
     variables = {
       SECRET_KEY = var.secret_key
@@ -54,4 +55,20 @@ data "aws_iam_policy_document" "app_lambda_policy" {
   }
 }
 
+
+resource "aws_iam_role_policy" "app_lambda_policy2" {
+  name   = "app-lambda-policy2"
+  role   = aws_iam_role.app_lambda_role.id
+  policy = data.aws_iam_policy_document.app_lambda_policy2.json
+}
+
+data "aws_iam_policy_document" "app_lambda_policy2" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "dynodb:GetItem",
+    ]
+    resources = ["*"]
+  }
+}
 
