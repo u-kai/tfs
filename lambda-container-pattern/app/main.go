@@ -9,5 +9,6 @@ func main() {
 
 func handler() error {
 	println("Hello, Lambda!")
+	println("GoodBye, Lambda!")
 	return nil
 }

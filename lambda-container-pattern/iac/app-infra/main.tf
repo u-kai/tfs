@@ -1,60 +1,21 @@
-resource "aws_scheduler_schedule_group" "scheduler_group" {
-  name = "scheduler-group"
+provider "aws" {
 }
 
-resource "aws_scheduler_schedule" "app_scheduler" {
-  name                = "app-scheduler"
-  schedule_expression = "rate(1 minute)"
-  flexible_time_window {
-    mode = "OFF"
+
+
+
+data "terraform_remote_state" "ecr" {
+  backend = "s3"
+  config = {
+    bucket = "terraform-state-playground-kai"
+    key    = "ecr/terraform.tfstate"
+    region = "ap-northeast-1"
   }
-  group_name = aws_scheduler_schedule_group.scheduler_group.name
-  target {
-    arn      = aws_lambda_function.app_lambda.arn
-    role_arn = aws_iam_role.event_scheduler_role.arn
-  }
-}
-
-
-resource "aws_iam_role" "event_scheduler_role" {
-  name = "event-scheduler-role"
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect = "Allow",
-        Principal = {
-          Service = "events.amazonaws.com"
-        },
-        Action = "sts:AssumeRole"
-      }
-    ]
-  })
-}
-
-resource "aws_iam_role_policy" "event_scheduler_policy" {
-  name   = "event-scheduler-policy"
-  role   = aws_iam_role.event_scheduler_role.id
-  policy = data.aws_iam_policy_document.event_scheduler_policy.json
-}
-
-data "aws_iam_policy_document" "event_scheduler_policy" {
-  statement {
-    effect = "Allow"
-    actions = [
-      "lambda:InvokeFunction"
-    ]
-    resources = [aws_lambda_function.app_lambda.arn]
-  }
-}
-
-module "ecr" {
-  source = "../ecr"
 }
 
 resource "aws_lambda_function" "app_lambda" {
   function_name = "app-lambda"
-  image_uri     = module.ecr.app_repo_url
+  image_uri     = "${data.terraform_remote_state.ecr.outputs.app_repo_url}:latest"
   package_type  = "Image"
   role          = aws_iam_role.app_lambda_role.arn
 
