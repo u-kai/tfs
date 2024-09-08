@@ -15,7 +15,7 @@ data "terraform_remote_state" "ecr" {
 
 resource "aws_lambda_function" "app_lambda" {
   function_name = "app-lambda"
-  image_uri     = "${data.terraform_remote_state.ecr.outputs.app_repo_url}:latest"
+  image_uri     = "${data.terraform_remote_state.ecr.outputs.app_repo_url}:010cb23b3390e0043c67d51739a21767402687e3"
   package_type  = "Image"
   role          = aws_iam_role.app_lambda_role.arn
 
