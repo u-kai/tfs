@@ -1,9 +1,6 @@
 provider "aws" {
 }
 
-
-
-
 data "terraform_remote_state" "ecr" {
   backend = "s3"
   config = {
