@@ -52,7 +52,6 @@ jobs:
 
       # Dockerイメージのビルドとキャッシュの利用
       - name: Build and push Docker image with Buildx
-        working-directory: ./lambda-container-pattern/app
         run: |
           docker buildx build \
             --cache-from type=local,src=/tmp/.buildx-cache \
