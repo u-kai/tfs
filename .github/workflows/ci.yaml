@@ -1,26 +1,36 @@
-name: Deploy to AWS ECR
+name: Build and Push Containers with Buildx and Cache
 
 on:
   push:
     branches:
-      - main # 'main' ブランチへのプッシュ時にトリガー
+      - main
+  pull_request:
+    branches:
+      - main
+
+env:
+  AWS_ACCOUNT_ID: 111815285043
 
 jobs:
-  build-and-push:
+  build:
+    name: Build and Push to ECR with Docker Buildx Cache
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write # OIDC 認証トークンを書き込む権限
-      contents: read # リポジトリコンテンツを読み取る権限
+
+    strategy:
+      matrix:
+        service: [app, service-a, service-b] # 並列で実行するサービスを定義
 
     steps:
+      # ソースコードをチェックアウト
       - name: Checkout code
         uses: actions/checkout@v3
 
+      # Docker Buildxのセットアップ
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Configure AWS credentials from OIDC
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ap-northeast-1 # 適切なAWSリージョンに設定
           role-to-assume: ${{vars.AWS_ROLE_ARN}}
@@ -29,10 +39,32 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v3
+      # キャッシュの復元
+      - name: Restore Docker cache
+        uses: actions/cache@v3
         with:
-          provenance: false
-          push: true
-          tags: 111815285043.dkr.ecr.ap-northeast-1.amazonaws.com/app-repo:${{github.sha}}
-          file: ./lambda-container-pattern/app/Dockerfile
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ hashFiles("lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile", "lambda-container-pattern/go.mod", "lambda-container-pattern/go.sum") }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-${{ matrix.service }}-
+
+      # Dockerイメージのビルドとキャッシュの利用
+      - name: Build and push Docker image with Buildx
+        working-directory: ./lambda-container-pattern/app
+        run: |
+          docker buildx build \
+            --cache-from type=local,src=/tmp/.buildx-cache \
+            --cache-from type=registry,ref=${env.AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${{ matrix.service }}-repo:latest \
+            --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
+            --tag ${env.AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${{ matrix.service }}-repo:${{ github.sha }} \
+            --push \
+            -f lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile \
+            .
+
+      # 新しいキャッシュの保存
+      - name: Save Docker cache
+        if: success()
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache-new
+          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ hashFiles("lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile", "lambda-container-pattern/go.mod", "lambda-container-pattern/go.sum") }}
