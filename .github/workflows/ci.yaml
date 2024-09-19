@@ -55,7 +55,6 @@ jobs:
         run: |
           docker buildx build \
             --cache-from type=local,src=/tmp/.buildx-cache \
-            --cache-from type=registry,ref=${env.AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${{ matrix.service }}-repo:latest \
             --cache-to type=local,dest=/tmp/.buildx-cache-new,mode=max \
             --tag ${env.AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com/${{ matrix.service }}-repo:${{ github.sha }} \
             --push \
