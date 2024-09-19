@@ -10,11 +10,13 @@ on:
 
 env:
   AWS_ACCOUNT_ID: 111815285043
-
 jobs:
   build:
     name: Build and Push to ECR with Docker Buildx Cache
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
 
     strategy:
       matrix:
