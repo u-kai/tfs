@@ -1,6 +1,10 @@
 package main
 
-import "github.com/aws/aws-lambda-go/lambda"
+import (
+	"app/pkg"
+
+	"github.com/aws/aws-lambda-go/lambda"
+)
 
 func main() {
 	lambda.Start(handler)
@@ -11,7 +15,7 @@ type Response struct {
 }
 
 func handler() (Response, error) {
-	println("Hello, ServiceB!")
+	println(pkg.Hello() + ", ServiceA!")
 	println("GoodBye, Lambda!")
-	return Response{Message: "Hello, Lambda!"}, nil
+	return Response{Message: "Hello, ServiceB!"}, nil
 }
