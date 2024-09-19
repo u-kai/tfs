@@ -23,6 +23,32 @@ resource "aws_lambda_function" "app_lambda" {
   }
 }
 
+resource "aws_lambda_function" "service_a_lambda" {
+  function_name = "service-a-lambda"
+  image_uri     = data.terraform_remote_state.ecr.outputs.service_a_repo
+  package_type  = "Image"
+  role          = aws_iam_role.app_lambda_role.arn
+
+  environment {
+    variables = {
+      SECRET_KEY = var.secret_key
+    }
+  }
+}
+
+resource "aws_lambda_function" "service_b_lambda" {
+  function_name = "service-b-lambda"
+  image_uri     = data.terraform_remote_state.ecr.outputs.service_b_repo
+  package_type  = "Image"
+  role          = aws_iam_role.app_lambda_role.arn
+
+  environment {
+    variables = {
+      SECRET_KEY = var.secret_key
+    }
+  }
+}
+
 variable "secret_key" {
   type      = string
   sensitive = true
