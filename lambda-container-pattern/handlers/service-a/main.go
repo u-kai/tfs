@@ -13,5 +13,5 @@ type Response struct {
 func handler() (Response, error) {
 	println("Hello, ServiceA!")
 	println("GoodBye, Lambda!")
-	return Response{Message: "Hello, Lambda!"}, nil
+	return Response{Message: "Hello, ServiceA!"}, nil
 }
