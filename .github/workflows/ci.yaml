@@ -44,7 +44,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ hashFiles("lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile", "lambda-container-pattern/go.mod", "lambda-container-pattern/go.sum") }}
+          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ hashFiles('lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile', 'lambda-container-pattern/go.mod', 'lambda-container-pattern/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-buildx-${{ matrix.service }}-
 
@@ -67,4 +67,4 @@ jobs:
         uses: actions/cache@v3
         with:
           path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ hashFiles("lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile", "lambda-container-pattern/go.mod", "lambda-container-pattern/go.sum") }}
+          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ hashFiles('lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile', 'lambda-container-pattern/go.mod', 'lambda-container-pattern/go.sum') }}
