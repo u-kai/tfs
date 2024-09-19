@@ -60,11 +60,6 @@ jobs:
             --push \
             -f "lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile" \
             .
-
-      # 新しいキャッシュの保存
-      - name: Save Docker cache
-        if: success()
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache-new
-          key: ${{ runner.os }}-buildx-${{ matrix.service }}-${{ hashFiles('lambda-container-pattern/handlers/${{ matrix.service }}/Dockerfile', 'lambda-container-pattern/go.mod', 'lambda-container-pattern/go.sum') }}
+      - name: Move the new cache to the old cache
+        run: |
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
